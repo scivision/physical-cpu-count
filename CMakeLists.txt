@@ -31,3 +31,7 @@ add_test(NAME CPUc COMMAND cpu_c)
 add_executable(cpu_cpp app/main.cpp $<TARGET_OBJECTS:cpu_count>)
 target_include_directories(cpu_cpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME CPUcpp COMMAND cpu_cpp)
+
+get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
+
+set_property(TEST ${tests} PROPERTY TIMEOUT 5)
