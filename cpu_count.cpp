@@ -113,9 +113,8 @@ unsigned int cpu_count(){
   }
 
   uint64_t NumberOfSockets = PhysicalIDs.size();
-  NumberOfSockets = std::max(NumberOfSockets, (uint64_t)1);
   // Physical ids returned by Linux don't distinguish cores.
-  // We want to record the total number of cores in this->NumberOfPhysicalCPU
+  // We want to record the total number of cores in NumberOfPhysicalCPU
   // (checking only the first proc)
   std::string Cores = ExtractValueFromCpuInfoFile(buffer, "cpu cores", CurrentPositionInFile);
   if (Cores.empty()) {
@@ -125,6 +124,10 @@ unsigned int cpu_count(){
   auto NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
   NumberOfCoresPerSocket = std::max(NumberOfCoresPerSocket, 1u);
   NumberOfPhysicalCPU = NumberOfCoresPerSocket * (unsigned int)NumberOfSockets;
+  if(NumberOfPhysicalCPU == 0) {
+    // ARM
+    NumberOfPhysicalCPU = NumberOfLogicalCPU;
+  }
 
 #elif defined(__APPLE__)
 
