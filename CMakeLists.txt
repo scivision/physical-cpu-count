@@ -18,6 +18,7 @@ endif()
 add_library(cpu_count OBJECT cpu_count.cpp)
 target_include_directories(cpu_count PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(cpu_count PRIVATE cxx_std_11)
+target_compile_definitions(cpu_count PRIVATE $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_WARNINGS>)
 
 if(fortran)
   add_executable(cpu_f app/main.f90 $<TARGET_OBJECTS:cpu_count>)
