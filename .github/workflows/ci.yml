@@ -1,0 +1,53 @@
+name: ci
+
+env:
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+on:
+  push:
+    paths:
+      - "**.c"
+      - "**.cpp"
+      - "**/*.f90"
+      - "**/CMakeLists.txt"
+      - "**.cmake"
+      - ".github/workflows/ci.yml"
+
+jobs:
+
+  linux_mac:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure
+      run: cmake -B build -Dfortran:BOOL=${{ runner.os == 'Linux' }}
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Test
+      run: ctest --test-dir build -V
+
+
+  msvc:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure
+      run: cmake -B build -Dfortran:BOOL=false
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Test
+      run: ctest --test-dir build -C Release -V
