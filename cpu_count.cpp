@@ -19,7 +19,9 @@
 #include <thread>
 
 #ifdef _WIN32
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #elif defined (__APPLE__)
 #include <sys/sysctl.h>
