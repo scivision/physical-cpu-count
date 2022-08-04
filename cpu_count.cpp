@@ -30,6 +30,8 @@
 #elif defined(__hpux)
 #include <sys/param.h>
 #include <sys/mpctl.h>
+#elif defined(__HAIKU__)
+#include <OS.h>
 #elif __has_include(<unistd.h>)
 #include <unistd.h>
 #endif
@@ -38,6 +40,7 @@ unsigned int CPUCountWindows();
 unsigned int ParseSysCtl();
 unsigned int RetrieveInformationFromCpuInfoFile();
 unsigned int QueryBSDProcessor();
+unsigned int QueryHaikuInfo();
 unsigned int QueryHPUXProcessor();
 unsigned int QueryProcessorBySysconf();
 unsigned int QueryThreads();
@@ -213,6 +216,21 @@ unsigned int ParseSysCtl(){
 
 }
 
+unsigned int QueryHaikuInfo(){
+
+  unsigned int NumberOfPhysicalCPU = 0;
+
+#if defined(__HAIKU__)
+
+  system_info info;
+  get_system_info(&info);
+  NumberOfPhysicalCPU = info.cpu_count;
+
+#endif
+
+  return NumberOfPhysicalCPU;
+
+}
 
 unsigned int QueryBSDProcessor(){
 
