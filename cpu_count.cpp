@@ -27,6 +27,9 @@
 #include <sys/sysctl.h>
 #elif defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 #include <sys/sysctl.h>
+#elif defined(__hpux)
+#include <sys/param.h>
+#include <sys/mpctl.h>
 #elif __has_include(<unistd.h>)
 #include <unistd.h>
 #endif
@@ -35,6 +38,7 @@ unsigned int CPUCountWindows();
 unsigned int ParseSysCtl();
 unsigned int RetrieveInformationFromCpuInfoFile();
 unsigned int QueryBSDProcessor();
+unsigned int QueryHPUXProcessor();
 unsigned int QueryProcessorBySysconf();
 unsigned int QueryThreads();
 
@@ -57,6 +61,10 @@ unsigned int cpu_count(){
   NumberOfPhysicalCPU = QueryBSDProcessor();
 #elif defined(__linux) || defined(__CYGWIN__)
   NumberOfPhysicalCPU = RetrieveInformationFromCpuInfoFile();
+#elif defined(__QNX__)
+  // kwSys uses other kwSys functions for QNX. Is there a QNX library call to do this?
+#elif defined(__hpux)
+  NumberOfPhysicalCPU = QueryHPUXProcessor();
 #endif
 
   if (NumberOfPhysicalCPU == 0)
@@ -227,6 +235,25 @@ unsigned int QueryBSDProcessor(){
   return NumberOfPhysicalCPU;
 
 }
+
+
+unsigned int QueryHPUXProcessor(){
+
+  unsigned int NumberOfPhysicalCPU = 0;
+
+#if defined(__hpux)
+  int c = mpctl(MPC_GETNUMSPUS_SYS, 0, 0);
+  if (c <= 0) {
+    return 0;
+  }
+
+  NumberOfPhysicalCPU = c;
+#endif
+
+  return NumberOfPhysicalCPU;
+
+}
+
 
 unsigned int QueryProcessorBySysconf(){
 
