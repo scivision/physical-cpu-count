@@ -66,6 +66,9 @@ unsigned int cpu_count(){
   NumberOfPhysicalCPU = RetrieveInformationFromCpuInfoFile();
 #elif defined(__QNX__)
   // kwSys uses other kwSys functions for QNX. Is there a QNX library call to do this?
+#elif defined(_AIX)
+  // https://www.ibm.com/support/pages/determining-how-many-cpus-you-have-under-aix
+  // looks like parsing text is required
 #elif defined(__hpux)
   NumberOfPhysicalCPU = QueryHPUXProcessor();
 #endif
