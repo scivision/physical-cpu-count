@@ -25,6 +25,8 @@
 #include <windows.h>
 #elif defined (__APPLE__)
 #include <sys/sysctl.h>
+#elif defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+#include <sys/sysctl.h>
 #elif __has_include(<unistd.h>)
 #include <unistd.h>
 #endif
@@ -32,6 +34,7 @@
 unsigned int CPUCountWindows();
 unsigned int ParseSysCtl();
 unsigned int RetrieveInformationFromCpuInfoFile();
+unsigned int QueryBSDProcessor();
 unsigned int QueryProcessorBySysconf();
 unsigned int QueryThreads();
 
@@ -50,7 +53,9 @@ unsigned int cpu_count(){
   NumberOfPhysicalCPU = CPUCountWindows();
 #elif defined (__APPLE__)
   NumberOfPhysicalCPU = ParseSysCtl();
-#elif defined (__unix__)
+#elif defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+  NumberOfPhysicalCPU = QueryBSDProcessor();
+#elif defined(__linux) || defined(__CYGWIN__)
   NumberOfPhysicalCPU = RetrieveInformationFromCpuInfoFile();
 #endif
 
@@ -200,9 +205,32 @@ unsigned int ParseSysCtl(){
 
 }
 
+
+unsigned int QueryBSDProcessor(){
+
+  unsigned int NumberOfPhysicalCPU = 0;
+
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+
+  int k;
+  size_t sz = sizeof(k);
+  int ctrl[2] = { CTL_HW, HW_NCPU };
+
+  if (sysctl(ctrl, 2, &k, &sz, nullptr, 0) != 0) {
+    return 0;
+  }
+
+  NumberOfPhysicalCPU = k;
+
+#endif
+
+  return NumberOfPhysicalCPU;
+
+}
+
 unsigned int QueryProcessorBySysconf(){
 
-unsigned int NumberOfPhysicalCPU = 0;
+  unsigned int NumberOfPhysicalCPU = 0;
 
 #if defined(_SC_NPROCESSORS_ONLN)
 
