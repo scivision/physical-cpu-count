@@ -15,23 +15,25 @@ if(NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)
   file(WRITE ${PROJECT_BINARY_DIR}/.gitignore "*")
 endif()
 
-add_library(cpu_count OBJECT cpu_count.cpp)
-target_include_directories(cpu_count PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(cpu_count OBJECT src/cpu_count.cpp)
+target_include_directories(cpu_count PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_features(cpu_count PRIVATE cxx_std_11)
 target_compile_definitions(cpu_count PRIVATE $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_WARNINGS>)
 
 if(fortran)
-  add_executable(cpu_f app/main.f90 $<TARGET_OBJECTS:cpu_count>)
+  add_executable(cpu_f app/main.f90)
+  target_link_libraries(cpu_f PRIVATE cpu_count)
   add_test(NAME CPUfortran COMMAND cpu_f)
 endif()
 
-add_executable(cpu_c app/main.c $<TARGET_OBJECTS:cpu_count>)
-target_include_directories(cpu_c PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(cpu_c app/main.c)
+target_link_libraries(cpu_c PRIVATE cpu_count)
 add_test(NAME CPUc COMMAND cpu_c)
 
-add_executable(cpu_cpp app/main.cpp $<TARGET_OBJECTS:cpu_count>)
-target_include_directories(cpu_cpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(cpu_cpp app/main.cpp)
+target_link_libraries(cpu_cpp PRIVATE cpu_count)
 add_test(NAME CPUcpp COMMAND cpu_cpp)
+
 
 get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
 
