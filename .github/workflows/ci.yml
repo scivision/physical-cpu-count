@@ -40,7 +40,7 @@ jobs:
       run: cmake --build build --parallel
 
     - name: Test
-      run: ctest --test-dir build -V
+      run: ctest --test-dir build -V --timeout 10
 
 
   msvc:
@@ -60,4 +60,4 @@ jobs:
       run: cmake --build build --config Release --parallel
 
     - name: Test
-      run: ctest --test-dir build -C Release -V
+      run: ctest --test-dir build -C Release -V --timeout 10

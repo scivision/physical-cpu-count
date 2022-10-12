@@ -91,7 +91,6 @@ unsigned int cpu_count(){
 unsigned int CPUCountWindows(){
 
   unsigned int NumberOfPhysicalCPU = 0;
-  unsigned int NumberOfLogicalCPU = 0;
 
 #ifdef _WIN32
 
@@ -133,7 +132,6 @@ unsigned int CPUCountWindows(){
       continue;
     }
     NumberOfPhysicalCPU++;
-    NumberOfLogicalCPU += (unsigned int)count;
   }
 
 #endif

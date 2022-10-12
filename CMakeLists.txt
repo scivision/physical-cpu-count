@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14...3.24)
+cmake_minimum_required(VERSION 3.15...3.25)
 
 project(CPUcount LANGUAGES C CXX)
 
@@ -13,6 +13,14 @@ endif()
 # --- auto-ignore build directory
 if(NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)
   file(WRITE ${PROJECT_BINARY_DIR}/.gitignore "*")
+endif()
+
+# --- add warnings
+
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|Intel|GNU")
+  add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-Wall>")
+elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
+  add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:/W4>")
 endif()
 
 add_library(cpu_count OBJECT src/cpu_count.cpp)
@@ -36,5 +44,3 @@ add_test(NAME CPUcpp COMMAND cpu_cpp)
 
 
 get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
-
-set_property(TEST ${tests} PROPERTY TIMEOUT 5)
