@@ -143,7 +143,6 @@ unsigned int CPUCountWindows(){
 
 unsigned int RetrieveInformationFromCpuInfoFile(){
 
-  unsigned int NumberOfLogicalCPU = 0;
   unsigned int NumberOfPhysicalCPU = 0;
   std::string buffer;
 
@@ -161,7 +160,6 @@ unsigned int RetrieveInformationFromCpuInfoFile(){
   // and SMT)
   size_t pos = buffer.find("processor\t");
   while (pos != std::string::npos) {
-    NumberOfLogicalCPU++;
     pos = buffer.find("processor\t", pos + 1);
   }
 
