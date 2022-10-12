@@ -24,13 +24,20 @@ jobs:
     timeout-minutes: 5
 
     steps:
+
+    - name: Fix macOS Gfortran alias
+      if: runner.os == 'macOS'
+      run: brew reinstall gcc
+
     - uses: actions/checkout@v3
 
     - name: Configure
-      run: cmake -B build -Dfortran:BOOL=${{ runner.os == 'Linux' }}
+      run: >-
+        cmake -B build
+        -DCMAKE_COMPILE_WARNING_AS_ERROR:BOOL=ON
 
     - name: Build
-      run: cmake --build build
+      run: cmake --build build --parallel
 
     - name: Test
       run: ctest --test-dir build -V
@@ -44,10 +51,13 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Configure
-      run: cmake -B build -Dfortran:BOOL=false
+      run: >-
+        cmake -B build
+        -Dfortran:BOOL=false
+        -DCMAKE_COMPILE_WARNING_AS_ERROR:BOOL=ON
 
     - name: Build
-      run: cmake --build build --config Release
+      run: cmake --build build --config Release --parallel
 
     - name: Test
       run: ctest --test-dir build -C Release -V
