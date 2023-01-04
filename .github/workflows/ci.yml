@@ -31,16 +31,7 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - name: Configure
-      run: >-
-        cmake -B build
-        -DCMAKE_COMPILE_WARNING_AS_ERROR:BOOL=ON
-
-    - name: Build
-      run: cmake --build build --parallel
-
-    - name: Test
-      run: ctest --test-dir build -V --timeout 10
+    - run: cmake --workflow --preset default
 
 
   msvc:
@@ -50,14 +41,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Configure
-      run: >-
-        cmake -B build
-        -Dfortran:BOOL=false
-        -DCMAKE_COMPILE_WARNING_AS_ERROR:BOOL=ON
-
-    - name: Build
-      run: cmake --build build --config Release --parallel
-
-    - name: Test
-      run: ctest --test-dir build -C Release -V --timeout 10
+    - run: cmake --workflow --preset msvc
