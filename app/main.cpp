@@ -1,6 +1,7 @@
 // Demo program for cpu_count
 
 #include <iostream>
+#include <cstdlib>
 
 #include "cpu_count.h"
 

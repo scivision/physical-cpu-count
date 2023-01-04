@@ -18,9 +18,7 @@ unsigned int cpu_count()
 Build the examples and test:
 
 ```sh
-cmake -B build
-cmake --build build
-ctest --test-dir build
+cmake --workflow --preset default
 ```
 
 Works with every compiler we tried including: GCC, Clang, Intel oneAPI, Visual Studio.
