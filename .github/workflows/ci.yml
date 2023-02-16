@@ -2,6 +2,7 @@ name: ci
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1
+  CTEST_NO_TESTS_ACTION: error
 
 on:
   push:
@@ -22,13 +23,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
+    env:
+      FC: gfortran-12
 
     steps:
-
-    - name: Fix macOS Gfortran alias
-      if: runner.os == 'macOS'
-      run: brew reinstall gcc
-
     - uses: actions/checkout@v3
 
     - run: cmake --workflow --preset default

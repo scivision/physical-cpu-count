@@ -2,7 +2,7 @@ program counter
 
 use, intrinsic :: iso_c_binding, only : C_INT
 
-implicit none (type, external)
+implicit none
 
 interface
 integer(C_INT) function cpu_count() bind(C)

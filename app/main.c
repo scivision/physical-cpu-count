@@ -5,7 +5,7 @@
 
 #include "cpu_count.h"
 
-int main(){
+int main(void){
 
   printf("Physical CPU count: %d\n", cpu_count());
 

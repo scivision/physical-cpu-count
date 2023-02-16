@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...3.25)
+cmake_minimum_required(VERSION 3.15...3.26)
 
 project(CPUcount LANGUAGES C CXX)
 
@@ -8,11 +8,6 @@ option(fortran "enable Fortran support" true)
 
 if(fortran)
   enable_language(Fortran)
-endif()
-
-# --- auto-ignore build directory
-if(NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)
-  file(WRITE ${PROJECT_BINARY_DIR}/.gitignore "*")
 endif()
 
 # --- add warnings
@@ -45,5 +40,7 @@ add_executable(cpu_cpp app/main.cpp)
 target_link_libraries(cpu_cpp PRIVATE cpu_count)
 add_test(NAME CPUcpp COMMAND cpu_cpp)
 
-
-get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
+# --- auto-ignore build directory
+if(NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)
+  file(WRITE ${PROJECT_BINARY_DIR}/.gitignore "*")
+endif()
