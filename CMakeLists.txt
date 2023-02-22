@@ -40,7 +40,4 @@ add_executable(cpu_cpp app/main.cpp)
 target_link_libraries(cpu_cpp PRIVATE cpu_count)
 add_test(NAME CPUcpp COMMAND cpu_cpp)
 
-# --- auto-ignore build directory
-if(NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)
-  file(WRITE ${PROJECT_BINARY_DIR}/.gitignore "*")
-endif()
+file(GENERATE OUTPUT .gitignore CONTENT "*")
