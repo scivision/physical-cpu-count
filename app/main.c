@@ -7,7 +7,7 @@
 
 int main(void){
 
-  printf("Physical CPU count: %d\n", cpu_count());
+  printf("Physical CPU count: %u\n", cpu_count());
 
   return EXIT_SUCCESS;
 }

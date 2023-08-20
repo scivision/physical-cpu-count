@@ -1,14 +1,17 @@
-cmake_minimum_required(VERSION 3.15...3.26)
+cmake_minimum_required(VERSION 3.15...3.27)
 
 project(CPUcount LANGUAGES C CXX)
 
 enable_testing()
 
 option(fortran "enable Fortran support" true)
+option(cppcheck "enable cppcheck")
 
 if(fortran)
   enable_language(Fortran)
 endif()
+
+set(CMAKE_CXX_STANDARD 11)
 
 # --- add warnings
 
@@ -21,9 +24,16 @@ if(MINGW)
   add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,GNU>:-Wno-cast-function-type>)
 endif()
 
+# CPPcheck
+if(cppcheck)
+  find_program(cppcheck_exe NAMES cppcheck REQUIRED)
+  set(cppcheck_opts --enable=all --inline-suppr --quiet --suppressions-list=${PROJECT_SOURCE_DIR}/cppcheck.supp)
+  set(CMAKE_C_CPPCHECK ${cppcheck_exe} --std=c++${CMAKE_CXX_STANDARD} ${cppcheck_opts})
+  set(CMAKE_CXX_CPPCHECK ${cppcheck_exe} --std=c++${CMAKE_CXX_STANDARD} ${cppcheck_opts})
+endif()
+
 add_library(cpu_count OBJECT src/cpu_count.cpp)
 target_include_directories(cpu_count PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_compile_features(cpu_count PRIVATE cxx_std_11)
 target_compile_definitions(cpu_count PRIVATE $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_WARNINGS>)
 
 if(fortran)
