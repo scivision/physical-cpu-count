@@ -9,6 +9,7 @@
 // Compiler OS-detection macros
 // https://sourceforge.net/p/predef/wiki/OperatingSystems/
 
+#include <iostream>
 #include <vector>
 #include <cassert>
 #include <bitset>
@@ -142,12 +143,12 @@ unsigned int CPUCountWindows(){
 
 
 unsigned int RetrieveInformationFromCpuInfoFile(){
-
   unsigned int NumberOfPhysicalCPU = 0;
   std::string buffer;
 
   FILE* fd = fopen("/proc/cpuinfo", "r");
   if (!fd) {
+    std::cerr << "Problem opening /proc/cpuinfo\n";
     return 0;
   }
 
@@ -158,6 +159,7 @@ unsigned int RetrieveInformationFromCpuInfoFile(){
   }
   fclose(fd);
   if (fileSize < 2) {
+    std::cerr << "No data in /proc/cpuinfo\n";
     return 0;
   }
   buffer.resize(fileSize - 2);
