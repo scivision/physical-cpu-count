@@ -24,10 +24,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     env:
-      FC: gfortran-12
+      CC: gcc-13
+      CXX: g++-13
+      FC: gfortran-13
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: cmake --workflow --preset default
 
@@ -37,6 +39,6 @@ jobs:
     timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: cmake --workflow --preset msvc
