@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...3.27)
+cmake_minimum_required(VERSION 3.15...3.29)
 
 project(CPUcount LANGUAGES C CXX)
 
@@ -16,10 +16,19 @@ set(CMAKE_CXX_STANDARD 11)
 # --- add warnings
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang|Intel|GNU")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>")
+endif()
+
+if(PROJECT_IS_TOP_LEVEL)
+
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|Intel|GNU")
   add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-Wall;-Wextra>")
 elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
   add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:/W4>")
 endif()
+
+endif()
+
 if(MINGW)
   add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,GNU>:-Wno-cast-function-type>)
 endif()

@@ -37,59 +37,10 @@
 #include <unistd.h>
 #endif
 
-unsigned int CPUCountWindows();
-unsigned int ParseSysCtl();
-unsigned int RetrieveInformationFromCpuInfoFile();
-unsigned int QueryBSDProcessor();
-unsigned int QueryHaikuInfo();
-unsigned int QueryHPUXProcessor();
-unsigned int QueryProcessorBySysconf();
-unsigned int QueryThreads();
-
-std::string ExtractValueFromCpuInfoFile(std::string buffer, const char* word,
-  size_t& CurrentPositionInFile, size_t init = 0);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-unsigned int cpu_count(){
-
-  unsigned int NumberOfPhysicalCPU = 0;
-
-#if defined (_WIN32)
-  NumberOfPhysicalCPU = CPUCountWindows();
-#elif defined (__APPLE__)
-  NumberOfPhysicalCPU = ParseSysCtl();
-#elif defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-  NumberOfPhysicalCPU = QueryBSDProcessor();
-#elif defined(__linux) || defined(__CYGWIN__)
-  NumberOfPhysicalCPU = RetrieveInformationFromCpuInfoFile();
-#elif defined(__QNX__)
-  // kwSys uses other kwSys functions for QNX. Is there a QNX library call to do this?
-#elif defined(_AIX)
-  // https://www.ibm.com/support/pages/determining-how-many-cpus-you-have-under-aix
-  // looks like parsing text is required
-#elif defined(__hpux)
-  NumberOfPhysicalCPU = QueryHPUXProcessor();
-#endif
-
-  if (NumberOfPhysicalCPU == 0)
-    NumberOfPhysicalCPU = QueryProcessorBySysconf();
-
-  if (NumberOfPhysicalCPU == 0)
-    NumberOfPhysicalCPU = QueryThreads();
-
-  return NumberOfPhysicalCPU;
-
-}
-
-#ifdef __cplusplus
-}
-#endif
+#include "cpu_count.h"
 
 
-unsigned int CPUCountWindows(){
+static unsigned int CPUCountWindows(){
 
   unsigned int NumberOfPhysicalCPU = 0;
 
@@ -142,7 +93,39 @@ unsigned int CPUCountWindows(){
 }
 
 
-unsigned int RetrieveInformationFromCpuInfoFile(){
+/** Extract a value from the CPUInfo file */
+static std::string ExtractValueFromCpuInfoFile(std::string buffer, const char* word,
+  size_t & CurrentPositionInFile, size_t init = 0)
+{
+
+  size_t pos = buffer.find(word, init);
+  if (pos != std::string::npos) {
+    CurrentPositionInFile = pos;
+    pos = buffer.find(':', pos);
+    size_t pos2 = buffer.find('\n', pos);
+    if (pos != std::string::npos && pos2 != std::string::npos) {
+      // It may happen that the beginning matches, but this is still not the
+      // requested key.
+      // An example is looking for "cpu" when "cpu family" comes first. So we
+      // check that
+      // we have only spaces from here to pos, otherwise we search again.
+      for (size_t i = CurrentPositionInFile + strlen(word); i < pos;
+           ++i) {
+        if (buffer[i] != ' ' && buffer[i] != '\t') {
+          return ExtractValueFromCpuInfoFile(buffer, word, CurrentPositionInFile, pos2);
+        }
+      }
+      buffer.erase(0, pos + 2);
+      buffer.resize(pos2 - pos - 2);
+      return buffer;
+    }
+  }
+  CurrentPositionInFile = std::string::npos;
+  return "";
+}
+
+
+static unsigned int RetrieveInformationFromCpuInfoFile(){
   unsigned int NumberOfPhysicalCPU = 0;
   std::string buffer;
 
@@ -205,7 +188,7 @@ unsigned int RetrieveInformationFromCpuInfoFile(){
 
 }
 
-unsigned int ParseSysCtl(){
+static unsigned int ParseSysCtl(){
 
   unsigned int NumberOfPhysicalCPU = 0;
 
@@ -245,7 +228,7 @@ unsigned int QueryHaikuInfo(){
 
 }
 
-unsigned int QueryBSDProcessor(){
+static unsigned int QueryBSDProcessor(){
 
   unsigned int NumberOfPhysicalCPU = 0;
 
@@ -268,7 +251,7 @@ unsigned int QueryBSDProcessor(){
 }
 
 
-unsigned int QueryHPUXProcessor(){
+static unsigned int QueryHPUXProcessor(){
 
   unsigned int NumberOfPhysicalCPU = 0;
 
@@ -286,7 +269,7 @@ unsigned int QueryHPUXProcessor(){
 }
 
 
-unsigned int QueryProcessorBySysconf(){
+static unsigned int QueryProcessorBySysconf(){
 
   unsigned int NumberOfPhysicalCPU = 0;
 
@@ -302,7 +285,7 @@ return NumberOfPhysicalCPU;
 
 }
 
-unsigned int QueryThreads(){
+static unsigned int QueryThreads(){
   // fallback, doesn't consider hyperthreading
 
   unsigned int NumberOfLogicalCPU = std::thread::hardware_concurrency();
@@ -313,33 +296,33 @@ unsigned int QueryThreads(){
 }
 
 
-/** Extract a value from the CPUInfo file */
-std::string ExtractValueFromCpuInfoFile(std::string buffer, const char* word,
-  size_t & CurrentPositionInFile, size_t init)
-{
+unsigned int cpu_count(){
 
-  size_t pos = buffer.find(word, init);
-  if (pos != std::string::npos) {
-    CurrentPositionInFile = pos;
-    pos = buffer.find(':', pos);
-    size_t pos2 = buffer.find('\n', pos);
-    if (pos != std::string::npos && pos2 != std::string::npos) {
-      // It may happen that the beginning matches, but this is still not the
-      // requested key.
-      // An example is looking for "cpu" when "cpu family" comes first. So we
-      // check that
-      // we have only spaces from here to pos, otherwise we search again.
-      for (size_t i = CurrentPositionInFile + strlen(word); i < pos;
-           ++i) {
-        if (buffer[i] != ' ' && buffer[i] != '\t') {
-          return ExtractValueFromCpuInfoFile(buffer, word, CurrentPositionInFile, pos2);
-        }
-      }
-      buffer.erase(0, pos + 2);
-      buffer.resize(pos2 - pos - 2);
-      return buffer;
-    }
-  }
-  CurrentPositionInFile = std::string::npos;
-  return "";
+  unsigned int NumberOfPhysicalCPU = 0;
+
+#if defined (_WIN32)
+  NumberOfPhysicalCPU = CPUCountWindows();
+#elif defined (__APPLE__)
+  NumberOfPhysicalCPU = ParseSysCtl();
+#elif defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+  NumberOfPhysicalCPU = QueryBSDProcessor();
+#elif defined(__linux) || defined(__CYGWIN__)
+  NumberOfPhysicalCPU = RetrieveInformationFromCpuInfoFile();
+#elif defined(__QNX__)
+  // kwSys uses other kwSys functions for QNX. Is there a QNX library call to do this?
+#elif defined(_AIX)
+  // https://www.ibm.com/support/pages/determining-how-many-cpus-you-have-under-aix
+  // looks like parsing text is required
+#elif defined(__hpux)
+  NumberOfPhysicalCPU = QueryHPUXProcessor();
+#endif
+
+  if (NumberOfPhysicalCPU == 0)
+    NumberOfPhysicalCPU = QueryProcessorBySysconf();
+
+  if (NumberOfPhysicalCPU == 0)
+    NumberOfPhysicalCPU = QueryThreads();
+
+  return NumberOfPhysicalCPU;
+
 }
